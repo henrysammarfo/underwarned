@@ -5,10 +5,10 @@ export const metadata: Metadata = { title: "Limitations" };
 
 export default function LimitationsPage() {
   return (
-    <div>
+    <div className="prose">
       <h1>Limitations</h1>
       <p>Dated 10 November 2026, Accra time (GMT). This list is part of the submitted method, not a footnote.</p>
-      <ul>
+      <ul className="limit-list">
         <li>
           ERA5 is a reanalysis, not a station thermometer. It can be smoother and slightly offset from an
           airport sensor. The user interface calls it the observation, never the measured airport
@@ -21,7 +21,7 @@ export default function LimitationsPage() {
           prints both coordinates. Madrid&apos;s larger gap is a material caveat for that city.
         </li>
         <li>
-          Results are for GFS seamless only. A miss or a false alarm is about this model family, not about
+          Results are for the GFS model family only. A miss or a false alarm is about this model family, not about
           every forecast a person might have read. Other models wait until 25 November if shortlisted.
         </li>
         <li>
@@ -53,7 +53,7 @@ export default function LimitationsPage() {
         </li>
       </ul>
       <p>
-        <Link href="/method">Method</Link> · <Link href="/legal">Legal and sources</Link>
+        Read the <Link href="/method">method</Link>, or the <Link href="/legal">legal and sources</Link> page.
       </p>
     </div>
   );

@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: "Method" };
 
 export default function MethodPage() {
   return (
-    <div>
+    <div className="prose">
       <h1>Method</h1>
       <p>
         Underwarned measures forecast underprediction of extreme heat at fixed lead times. For each city,
@@ -30,7 +30,7 @@ export default function MethodPage() {
         day lead archive.
       </p>
       <h2>Endpoints and parameters</h2>
-      <div className="card" style={{ overflowX: "auto" }}>
+      <div style={{ overflowX: "auto" }}>
         <table className="data">
           <thead>
             <tr>

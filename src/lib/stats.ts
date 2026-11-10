@@ -112,3 +112,17 @@ export function leadStatsFromSummary(
 ): LeadStats | null {
   return stats ?? null;
 }
+
+
+export function weightedMean(
+  parts: { value: number | null | undefined; n: number | null | undefined }[],
+): number | null {
+  let num = 0;
+  let den = 0;
+  for (const p of parts) {
+    if (p.value === null || p.value === undefined || !p.n) continue;
+    num += p.value * p.n;
+    den += p.n;
+  }
+  return den ? num / den : null;
+}

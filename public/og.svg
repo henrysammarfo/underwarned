@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#F6F1E8"/>
+  <text x="72" y="120" font-family="Georgia, serif" font-size="36" fill="#1C1917">Underwarned</text>
+  <text x="72" y="340" font-family="Georgia, serif" font-size="220" font-weight="500" fill="#C23B22">11.2%</text>
+  <text x="72" y="430" font-family="Georgia, serif" font-size="44" fill="#1C1917">missed at a 3 day lead</text>
+  <text x="72" y="520" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#534E47">Phoenix days at or above 40 °C, May to September 2024 and 2025. GFS versus ERA5.</text>
+  <rect x="72" y="560" width="240" height="16" fill="#C23B22"/>
+</svg>

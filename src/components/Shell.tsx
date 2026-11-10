@@ -4,20 +4,18 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
 
-const LINKS = [
-  { href: "/", label: "Home", tab: false },
-  { href: "/audit", label: "Audit", tab: true },
-  { href: "/events", label: "Events", tab: true },
-  { href: "/compare", label: "Compare", tab: false },
-  { href: "/method", label: "Method", tab: true },
-  { href: "/limitations", label: "Limitations", tab: false },
-  { href: "/legal", label: "Legal", tab: false },
+const MAST = [
+  { href: "/audit", label: "Audit" },
+  { href: "/events", label: "Events" },
+  { href: "/compare", label: "Compare" },
+  { href: "/method", label: "Method" },
 ];
 
 export function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const search = useSearchParams();
   const moreOpen = search.get("more") === "1";
+  const isHome = path === "/";
 
   function active(href: string) {
     if (href === "/") return path === "/";
@@ -29,20 +27,19 @@ export function Shell({ children }: { children: ReactNode }) {
       <a className="skip" href="#content">
         Skip to content
       </a>
-      <aside className="sidebar">
+      <header className="masthead">
         <Link href="/" className="brand">
           Underwarned
-          <span>Forecast heat underprediction audit</span>
         </Link>
-        <nav className="side-nav desktop-only" aria-label="Primary">
-          {LINKS.map((l) => (
+        <nav className="mast-nav" aria-label="Primary">
+          {MAST.map((l) => (
             <Link key={l.href} href={l.href} className={active(l.href) ? "active" : ""}>
               {l.label}
             </Link>
           ))}
         </nav>
-      </aside>
-      <div className="main">
+      </header>
+      <div className={`main${isHome ? " main-home" : ""}`}>
         <div id="content">{children}</div>
         <footer className="site">
           <span>Underwarned, DATANOVA 2026, problem DN-OP-01.</span>
@@ -52,7 +49,10 @@ export function Shell({ children }: { children: ReactNode }) {
         </footer>
       </div>
       <nav className="tabs" aria-label="Mobile">
-        <Link href="/audit" className={active("/audit") ? "active" : ""}>
+        <Link href="/" className={active("/") && !moreOpen ? "active" : ""}>
+          Home
+        </Link>
+        <Link href="/audit" className={active("/audit") && !moreOpen ? "active" : ""}>
           Audit
         </Link>
         <Link href="/events" className={active("/events") && !moreOpen ? "active" : ""}>
@@ -66,28 +66,9 @@ export function Shell({ children }: { children: ReactNode }) {
         </Link>
       </nav>
       {moreOpen ? (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(28,25,23,0.35)",
-            zIndex: 30,
-            display: "flex",
-            alignItems: "flex-end",
-          }}
-        >
-          <div
-            className="card more-sheet"
-            style={{
-              width: "100%",
-              borderRadius: "16px 16px 0 0",
-              paddingBottom: "calc(16px + env(safe-area-inset-bottom))",
-            }}
-          >
+        <div className="sheet-backdrop" role="presentation">
+          <div className="more-sheet" role="dialog" aria-label="More pages">
             <h3>More</h3>
-            <Link href="/" className="btn-ghost">
-              Home
-            </Link>
             <Link href="/compare" className="btn-ghost">
               Compare cities
             </Link>

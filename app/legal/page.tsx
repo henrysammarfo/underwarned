@@ -4,7 +4,7 @@ export const metadata: Metadata = { title: "Legal and sources" };
 
 export default function LegalPage() {
   return (
-    <div>
+    <div className="prose">
       <h1>Legal and sources</h1>
       <p>
         Underwarned is a student project for DATANOVA 2026. It has no accounts and stores no personal

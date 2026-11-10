@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { CityData, LeadScore } from "@/lib/types";
-import { CITY_ORDER, CITY_NAMES, THRESHOLDS, fmtNum, fmtPct } from "@/lib/format";
+import { CITY_ORDER, CITY_NAMES, fmtNum, fmtPct } from "@/lib/format";
 import { scoresFor } from "@/lib/stats";
 import { useDemoState, DemoBanner } from "@/lib/hooks";
-import { LEADS } from "@/lib/types";
+import { FilterBar } from "@/components/FilterBar";
 import type { SeasonSel } from "@/lib/types";
 
 export default function ComparePage() {
@@ -64,8 +64,8 @@ export default function ComparePage() {
   if (demo === "loading" || loading) {
     return (
       <div>
-        <h1>Compare cities</h1>
-        <div className="grid-4" style={{ marginTop: 16 }}>
+        <div className="skeleton" style={{ height: 48, width: "40%", marginBottom: 16 }} />
+        <div className="record" style={{ marginTop: 16 }}>
           {CITY_ORDER.map((id) => (
             <div key={id} className="skeleton" style={{ height: 140 }} />
           ))}
@@ -78,84 +78,64 @@ export default function ComparePage() {
     <div>
       <DemoBanner demo={demo} />
       <h1>Compare cities</h1>
-      <p className="muted">
-        The same threshold and lead, across all four cities, for the selected seasons. A city with no events
-        is labelled honestly, not left blank.
+      <p className="lede">
+        The same threshold and lead, across all four cities, for the selected seasons. A city with no
+        events is labelled honestly, not left blank. Small samples always print their event count.
       </p>
-      <div className="filters">
-        <label>
-          Season
-          <select value={season} onChange={(e) => set({ season: e.target.value })}>
-            <option value="both">Both summers</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-          </select>
-        </label>
-        <label>
-          Threshold
-          <select value={threshold} onChange={(e) => set({ threshold: e.target.value })}>
-            {THRESHOLDS.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Lead
-          <select value={String(lead)} onChange={(e) => set({ lead: e.target.value })}>
-            {LEADS.map((L) => (
-              <option key={L} value={String(L)}>
-                {L} day
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="grid-2">
+      <FilterBar
+        season={season}
+        threshold={threshold}
+        lead={lead}
+        onChange={set}
+        showCity={false}
+      />
+      <div className="record">
         {CITY_ORDER.map((id) => {
           const entry = cities[id];
           if (entry === "error") {
             return (
-              <div key={id} className="card">
+              <article key={id} className="poster">
                 <h3>{CITY_NAMES[id]}</h3>
                 <p className="danger">This city file failed to load.</p>
                 <button className="btn" onClick={() => location.reload()}>
                   Retry
                 </button>
-              </div>
+              </article>
             );
           }
           if (entry === "loading" || !entry) {
             return (
-              <div key={id} className="card">
+              <article key={id} className="poster">
                 <h3>{CITY_NAMES[id]}</h3>
                 <p className="muted">Pending.</p>
-              </div>
+              </article>
             );
           }
           const score: LeadScore | null = scoresFor(entry, season, effectiveThreshold, lead);
           if (!score || score.observed_events === 0) {
             return (
-              <div key={id} className="card">
+              <article key={id} className="poster">
                 <h3>{CITY_NAMES[id]}</h3>
-                <p>No days at this threshold.</p>
-                <Link href={`/audit?city=${id}&threshold=${effectiveThreshold}&lead=${lead}`}>Open audit</Link>
-              </div>
+                <div className="figure">None</div>
+                <p>No days at this threshold. Try 35 °C or the local 95th percentile.</p>
+                <Link href={`/audit?city=${id}&threshold=${effectiveThreshold}&lead=${lead}`}>
+                  Open audit
+                </Link>
+              </article>
             );
           }
           return (
-            <div key={id} className="card">
+            <article key={id} className="poster">
               <h3>{CITY_NAMES[id]}</h3>
               <div className="figure accent">{fmtPct(score.miss_rate)}</div>
-              <p style={{ margin: "8px 0 0" }}>
-                Miss rate at a {lead} day lead, {score.observed_events} events, {score.misses} misses, mean
+              <p>
+                Miss rate at a {lead} day lead, {score.misses} of {score.observed_events} events, mean
                 shortfall {fmtNum(score.mean_shortfall_on_misses)} °C, {score.false_alarms} false alarms.
               </p>
               <Link href={`/audit?city=${id}&season=${season}&threshold=${effectiveThreshold}&lead=${lead}`}>
                 Open audit
               </Link>
-            </div>
+            </article>
           );
         })}
       </div>

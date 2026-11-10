@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useCity, DemoBanner } from "@/lib/hooks";
 import { MissRibbon } from "@/components/MissRibbon";
+import { HourlyChart } from "@/components/HourlyChart";
 import { CITY_NAMES, fmtNum, fmtDate } from "@/lib/format";
 import type { CityId } from "@/lib/types";
 
@@ -19,7 +20,7 @@ export default function DayPage() {
   if (loading) {
     return (
       <div>
-        <p className="muted">{date}</p>
+        <div className="skeleton" style={{ height: 40, width: "40%", marginBottom: 16 }} />
         <div className="skeleton" style={{ height: 240 }} />
       </div>
     );
@@ -28,6 +29,7 @@ export default function DayPage() {
     return (
       <div>
         <DemoBanner demo={demo} />
+        <h1>This day could not be loaded</h1>
         <div className="banner error" role="alert">
           <p>{error}</p>
           <button className="btn" onClick={() => location.reload()}>
@@ -65,106 +67,53 @@ export default function DayPage() {
     );
   }
 
-  const w = 640;
-  const h = 260;
-  const pad = { l: 40, r: 12, t: 16, b: 28 };
   const times = hours ?? [];
-  const vals: number[] = [];
-  times.forEach((pt) => {
+  const missingHours = times.filter((pt) => {
     const o = variable === "temperature_2m" ? pt.temperature_2m_obs : pt.apparent_temperature_obs;
-    const f = variable === "temperature_2m" ? pt.temperature_2m_leads[String(lead)] : pt.apparent_temperature_leads[String(lead)];
-    if (o !== null) vals.push(o);
-    if (f !== null && f !== undefined) vals.push(f);
-  });
-  vals.push(thresholdValue);
-  const lo = (vals.length ? Math.min(...vals) : 0) - 2;
-  const hi = (vals.length ? Math.max(...vals) : 40) + 2;
-  const x = (i: number) => pad.l + (i / Math.max(times.length - 1, 1)) * (w - pad.l - pad.r);
-  const y = (v: number) => pad.t + ((hi - v) / (hi - lo)) * (h - pad.t - pad.b);
-  const path = (getter: (i: number) => number | null | undefined) => {
-    const parts: string[] = [];
-    times.forEach((pt, i) => {
-      const v = getter(i);
-      if (v === null || v === undefined) {
-        parts.push("");
-        return;
-      }
-      parts.push(`${parts.filter(Boolean).length === 0 || parts[parts.length - 1] === "" ? "M" : "L"}${x(i)} ${y(v)}`);
-    });
-    return parts.join(" ");
-  };
-
-  const missingHours =
-    times.filter((pt) => {
-      const o = variable === "temperature_2m" ? pt.temperature_2m_obs : pt.apparent_temperature_obs;
-      const f = variable === "temperature_2m" ? pt.temperature_2m_leads[String(lead)] : pt.apparent_temperature_leads[String(lead)];
-      return o === null || f === null || f === undefined;
-    }).length;
+    const f =
+      variable === "temperature_2m"
+        ? pt.temperature_2m_leads[String(lead)]
+        : pt.apparent_temperature_leads[String(lead)];
+    return o === null || f === null || f === undefined;
+  }).length;
 
   return (
     <div>
       <DemoBanner demo={demo} />
       <p className="muted">
         <Link href={`/events?city=${city}&threshold=${thresholdId}&lead=${lead}`}>Events</Link>
-        {" · "}
+        {" in "}
         {CITY_NAMES[city]}
       </p>
       <h1>{fmtDate(date)}</h1>
-      <p>
+      <p className="lede">
         {variable === "temperature_2m" ? "2 m temperature" : "Apparent temperature"}, {lead} day lead.
         ERA5 grid {data.era5_grid.latitude.toFixed(4)}, {data.era5_grid.longitude.toFixed(4)}. Previous
         Runs grid {data.previous_runs_grid.latitude.toFixed(4)}, {data.previous_runs_grid.longitude.toFixed(4)}.
         Distance {fmtNum(data.grid_distance_km, 2)} km.
       </p>
-      <MissRibbon observed={obs} forecast={forecast} threshold={thresholdValue} lead={lead} />
+      <MissRibbon
+        observed={obs}
+        forecast={forecast}
+        threshold={thresholdValue}
+        lead={lead}
+        caption={`${CITY_NAMES[city]} on ${fmtDate(date)}, ${lead} day lead against the ${fmtNum(thresholdValue)} °C mark.`}
+      />
       {times.length === 0 ? (
-        <div className="card" style={{ marginTop: 16 }}>
-          <p>
-            Hourly traces were stored only for days that reached 35 °C, 40.6 °C apparent temperature, or
-            the local 95th percentile. This date has daily maxima but no stored hourly series.
-          </p>
-        </div>
+        <p>
+          Hourly traces were stored only for days that reached 35 °C, 40.6 °C apparent temperature, or
+          the local 95th percentile. This date has daily maxima but no stored hourly series.
+        </p>
       ) : (
-        <div className="card" style={{ marginTop: 16 }}>
-          <h3>Hourly traces</h3>
+        <>
           {missingHours > 0 ? (
             <p className="warn">
               {missingHours} hour{missingHours === 1 ? "" : "s"} are missing and are drawn as gaps, not as
               zeros.
             </p>
           ) : null}
-          <svg viewBox={`0 0 ${w} ${h}`} width="100%" height="280" role="img">
-            <title>Hourly ERA5 and forecast temperature</title>
-            <line x1={pad.l} y1={y(thresholdValue)} x2={w - pad.r} y2={y(thresholdValue)} stroke="#d4a017" strokeDasharray="4 3" />
-            <path
-              d={path((i) =>
-                variable === "temperature_2m" ? times[i].temperature_2m_obs : times[i].apparent_temperature_obs,
-              )}
-              fill="none"
-              stroke="#1c1917"
-              strokeWidth="2"
-            />
-            <path
-              d={path((i) =>
-                variable === "temperature_2m"
-                  ? times[i].temperature_2m_leads[String(lead)]
-                  : times[i].apparent_temperature_leads[String(lead)],
-              )}
-              fill="none"
-              stroke="#3f5b73"
-              strokeWidth="2"
-            />
-            <text x={pad.l} y={14} fontSize="11" fill="#6b645c">
-              {hi.toFixed(0)} °C
-            </text>
-            <text x={pad.l} y={h - 8} fontSize="11" fill="#6b645c">
-              {lo.toFixed(0)} °C
-            </text>
-          </svg>
-          <p className="muted" style={{ margin: 0, fontSize: 12 }}>
-            Black: ERA5. Slate: forecast at this lead. Gold dashed: threshold ({fmtNum(thresholdValue)} °C).
-          </p>
-        </div>
+          <HourlyChart times={times} lead={lead} variable={variable} thresholdValue={thresholdValue} />
+        </>
       )}
     </div>
   );
