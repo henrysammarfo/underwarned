@@ -46,6 +46,7 @@ export function Shell({ children }: { children: ReactNode }) {
           <Link href="/method">Method</Link>
           <Link href="/limitations">Limitations</Link>
           <Link href="/legal">Legal and sources</Link>
+          <a href="/deck.pdf">Deck</a>
         </footer>
       </div>
       <nav className="tabs" aria-label="Mobile">
