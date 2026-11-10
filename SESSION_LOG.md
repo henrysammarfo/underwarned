@@ -9,3 +9,6 @@
 - Wrote metrics module and unit tests (23 tests).
 - Built the Next.js demo with the approved palette, miss ribbon, and demo state query flags.
 - No API keys were used or committed.
+
+- Deployed production to https://underwarned.vercel.app (READY).
+- Wrote the rubric-mapped deck to docs/Underwarned-DATANOVA-deck.pptx and /workspace/Underwarned-DATANOVA-deck.pptx.
